@@ -44,6 +44,7 @@ def login():
                 else:
                     fname, lname = check_login(userName, password)
                     st.session_state["logged in"] = True
+                    st.session_state.email = userName
                     #st.write("Welcome back: " + check_login(userName, password))
 
 

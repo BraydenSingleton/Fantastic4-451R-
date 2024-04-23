@@ -2,6 +2,7 @@ import mysql.connector
 import bcrypt
 from Login import *
 import streamlit as st
+from datetime import date
 
 # To Do
 # Disable Login option upon successful login
@@ -23,6 +24,7 @@ connection = mysql.connector.connect(
 mycursor = connection.cursor()
 mycursor.execute("SELECT * FROM user_info")
 users = mycursor.fetchall()
+
 
 def change_password(password, email):
     userBytes = password.encode('utf-8')
@@ -88,9 +90,9 @@ def add_to_database(first, last, email, password, a1, a2, a3):
 
 def addTransaction(email, cat, amount):
     mycursor = connection.cursor()
-    query = ("INSERT INTO user_transactions(email, category, amount)"
-             "VALUES(%s, %s, %s)")
-    record = (email, cat, amount)
+    query = ("INSERT INTO user_transactions(email, category, amount, date)"
+             "VALUES(%s, %s, %s,%s)")
+    record = (email, cat, amount, date.today())
     mycursor.execute(query, record)
     connection.commit()
 
@@ -100,6 +102,7 @@ def getUser(email):
 def getLists(email):
     categories = []
     amounts = []
+    dates = []
     mycursor = connection.cursor()
     mycursor.execute("SELECT * FROM user_transactions")
     users = mycursor.fetchall()
@@ -108,4 +111,19 @@ def getLists(email):
         if users[i][0] == email:
             categories.append(users[i][1])
             amounts.append(users[i][2])
-    return categories, amounts
+            dates.append(users[i][3])
+    return categories, amounts, dates
+
+def getUserInfo(email):
+    firstName = ""
+    lastName = ""
+    mycursor = connection.cursor()
+    mycursor.execute("SELECT * FROM user_info")
+    users = mycursor.fetchall()
+
+    for i in range(len(users)):
+        if users[i][2] == email:
+            firstName = users[i][0]
+            lastName = users[i][1]
+    
+    return firstName, lastName
