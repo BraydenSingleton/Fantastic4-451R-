@@ -21,21 +21,32 @@ def homePage():
 
     add_select = st.sidebar.selectbox(
         "Select an option: ",
-        ("Home", "Add Transactions", "View Transactions", "Loan Calculator")
+        ("Home","User Profile and Settings", "Add Transactions", "View Transactions", "Loan Calculator")
     )
 
     if add_select == "Home":
 
-        st.markdown("<h1 style='text-align: center; color: Grey; font-size: 40px'> Home </h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: center; color: white; font-size: 40px'> Home </h1>", unsafe_allow_html=True)
         st.markdown("<h1 style='text-align: center; color: white; font-size: 20px'> Select an option in the sidebar </h1>", unsafe_allow_html=True)
 
 
+    if add_select == "User Profile and Settings":
+
+        firstName, lastName = getUserInfo(st.session_state.email)
+
+        st.markdown("<h1 style='text-align: center; color: white; font-size: 40px'> User Profile </h1>", unsafe_allow_html=True)
+        st.write("First Name: ", firstName)
+        st.write("Last Name: ", lastName)
+
+        changed_password = st.text_input("Password")
+        if st.button("Change Password"):
+            change_password(changed_password, st.session_state.email)
+
+
     if add_select == "Add Transactions":
-        st.markdown("<h1 style='text-align: center; color: black; font-size: 40px'> Add Transactions </h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: center; color: white; font-size: 40px'> Add Transactions </h1>", unsafe_allow_html=True)
 
-        email = st.text_input("Enter Email: ")
-
-        menu = ['--', 'Utilities', 'Groceries', 'Transportations', 'Subscriptions', 'Misc']
+        menu = ['--', 'Utilities', 'Groceries', 'Transportations', 'Subscriptions','Housing','Entertainment','Misc']
         trans = st.selectbox("What is the category of transaction", menu)
 
         amount = st.text_input('Amount: ')
@@ -47,48 +58,43 @@ def homePage():
             except ValueError:
                 flag = True
             if flag:
-                st.write('Input must be a number')
-            elif check_repeat(email) == True:
-                st.write("Incorrect Email")
+                st.write(':red[Input must be a number]')
             elif trans == '--':
-                st.write("Category cannot be blank")
+                st.write(":red[Category cannot be blank]")
             elif amount == '':
-                st.write("Amount cannot be blank")
+                st.write(":red[Amount cannot be blank]")
             elif int(amount) < 0:
-                st.write("Amount cannot be negative")
+                st.write(":red[Amount cannot be negative]")
             else:
                 st.write("Transaction accepted and added to transaction history")
-                addTransaction(email, trans, amount)
+                addTransaction(st.session_state.email, trans, amount)
 
     if add_select == "View Transactions":
-        st.markdown("<h1 style='text-align: center; color: black; font-size: 40px'> View Transactions </h1>", unsafe_allow_html=True)
-        st.write("Enter email and hit enter to view transaction history")
-        email = st.text_input("Email: ")
-        if st.button("Enter"):
-            if check_repeat(email) == True:
-                st.write("Incorrect Email")
-            else:
-                cats = []
-                amounts = []
-                cats, amounts = getLists(email)
-                df = pd.DataFrame(
-                    {
-                        "categories": cats,
-                        "amounts": amounts
-                    }
-                )
-                st.dataframe(
-                    df,
-                    column_config={
-                        "categories": "Categories",
-                        "amounts": "Amounts"
-                    },
-                    hide_index=True,
-                )
+        st.markdown("<h1 style='text-align: center; color: white; font-size: 40px'> View Transactions </h1>", unsafe_allow_html=True)
+        cats = []
+        amounts = []
+        dates= []
+        cats, amounts, dates = getLists(st.session_state.email)
+        df = pd.DataFrame(
+            {
+                "categories": cats,
+                "amounts": amounts, 
+                "dates": dates
+            }
+        )
+        st.dataframe(
+            df,
+            column_config={
+                "categories": "Categories",
+                "amounts": "Amounts",
+                "dates": "Date Entered"
+            },
+            hide_index=True,
+        )
 
 
     if add_select == "Loan Calculator":
-        st.markdown("<h1 style='text-align: center; color: black; font-size: 40px'> Loan Calculator </h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: center; color: white; font-size: 40px'> Loan Calculator </h1>", unsafe_allow_html=True)
 
         loan_amount = (st.text_input("Loan Amount: "))
         length = (st.text_input("Loan Term (in years)"))
