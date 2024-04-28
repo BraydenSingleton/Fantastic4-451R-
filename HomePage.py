@@ -83,15 +83,41 @@ def homePage():
                 "dates": dates
             }
         )
-        st.dataframe(
-            df,
-            column_config={
-                "categories": "Categories",
-                "amounts": "Amounts",
-                "dates": "Date Entered"
-            },
-            hide_index=True,
-        )
+
+        sort_option = st.selectbox("Sort by", ("Category", "Amounts", "Date Entered, Year-Month-Day"))
+
+        if sort_option == "Category":
+            df = df.sort_values(by=['categories'])
+        elif sort_option == "Amounts":
+            df = df.sort_values(by=['amounts'])
+        else:
+            df['dates'] = pd.to_datetime(df['dates'])
+            df = df.sort_values(by=['dates'])
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.dataframe(
+                df,
+                column_config={
+                    "categories": "Categories",
+                    "amounts": "Amounts",
+                    "dates": "Date Entered, Year-Month-Day"
+                },
+                hide_index=True,
+            )
+            
+        with col2:
+            display_option = st.selectbox("Spending Statistics:", ("Most Frequent Category", "Monthly Total", "Category with Most Spent"))
+            if display_option == "Most Frequent Category":
+                most_frequent_category = df['categories'].mode()[0]
+                st.write(f"Most frequent category: **{most_frequent_category}**")
+            elif display_option == "Monthly Total":
+                total_spent = df['amounts'].sum()   
+                st.write(f"Spent this month: $**{str(total_spent)}**")
+            else:
+                category_with_most_spent = df.groupby('categories')['amounts'].sum().idxmax()
+                st.write(f"Category with most spent: **{category_with_most_spent}**")
 
 
     if add_select == "Loan Calculator":
