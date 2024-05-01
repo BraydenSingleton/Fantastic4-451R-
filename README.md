@@ -3,5 +3,5 @@
 Team Memebers
 Brayden Singleton (Team Lead),
 Aidan Leeson,
-Joesph Nguyen,
+Joseph Nguyen,
 Hunter Tsydal,
